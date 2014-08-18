@@ -1,0 +1,15 @@
+[package]
+
+name = "anchor"
+version = "0.0.1"
+authors = ["Lee Accomando <lraccomando@gmail.com>"]
+
+
+[[lib]]
+
+name = "anchor"
+path = "src/lib.rs"
+
+[dependencies.iron]
+git = "https://github.com/iron/iron.git"
+
