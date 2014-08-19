@@ -12,4 +12,3 @@ path = "src/lib.rs"
 
 [dependencies.iron]
 git = "https://github.com/iron/iron.git"
-

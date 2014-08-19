@@ -1,45 +1,55 @@
-extern crate http;
-extern crate iron;
+use std::io::net::ip::Ipv4Addr;
 
-use iron::{Middleware, Request, Response, Status, Unwind};
+use iron::{Chain, Iron, Middleware, Request, Status, Server, Unwind};
+use iron::Response as HttpResponse;
 
-use controller::{Controller, Responses, Body};
-use router::{Router, DefaultRouter};
+use controller::{Controller, Response, Body};
+use router::{Route, Router, DefaultRouter};
+
 
 pub type App = Anchor<DefaultRouter>;
 
-#[deriving(Clone)]
+
 pub struct Anchor<R> {
-    router: R
+    server: Server,
+    anchor: AnchorMiddleware<R>,
 }
 
 impl<R: Router> Anchor<R> {
     pub fn new() -> Anchor<R> {
-        Anchor { router: Router::new() }
+        Anchor { server: Iron::new(), anchor: AnchorMiddleware::new() }
+    }
+
+    pub fn register<C: Controller>(&mut self, path: &'static str, controller: C) {
+        self.anchor.register(path.to_string(), controller);
+    }
+
+    pub fn run(mut self) {
+        self.server.chain.link(self.anchor);
+        self.server.listen(Ipv4Addr(127, 0, 0, 1), 3000);
     }
 }
+
 
 #[deriving(Clone)]
-struct HelloWorld {
-    value: &'static str
+struct AnchorMiddleware<R> {
+    router: R
 }
 
-impl HelloWorld {
-    fn new() -> HelloWorld {
-        HelloWorld {value: "Hello there, World!"}
+impl<R: Router> AnchorMiddleware<R> {
+    pub fn new() -> AnchorMiddleware<R> {
+        AnchorMiddleware { router: Router::new() }
+    }
+
+    pub fn register<C: Controller>(&mut self, path: String, controller:C) {
+        self.router.register(path, controller);
     }
 }
 
-impl Controller for HelloWorld {
-    fn get(&self, request: &mut Request) -> Responses {
-        Body("Hello, World")
-    }
-}
-
-impl<R: Router> Middleware for Anchor<R> {
-    fn enter(&mut self, request: &mut Request, response: &mut Response) -> Status {
-        self.router.register("hello", HelloWorld::new());
-        match self.router.match_path(&request.url.path) {
+impl<R: Router> Middleware for AnchorMiddleware<R> {
+    fn enter(&mut self, request: &mut Request, response: &mut HttpResponse) -> Status {
+        let path = request.url.path.connect("/");
+        match self.router.match_path(&path) {
             Some(controller) => {
                 controller.dispatch(request, response)
             }
@@ -48,6 +58,5 @@ impl<R: Router> Middleware for Anchor<R> {
                 Unwind
             }
         }
-
     }
 }

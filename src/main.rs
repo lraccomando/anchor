@@ -1,15 +1,21 @@
-extern crate http;
 extern crate iron;
 extern crate anchor;
 
-use std::io::net::ip::Ipv4Addr;
-use iron::{Iron, Chain, Server};
+use iron::{Iron, Chain, Request, Server};
 
-use anchor::{Anchor, App};
+use anchor::{Anchor, App, Body, Controller, Response};
 
 fn main () {
-	let mut server: Server = Iron::new();
-	let mut app: App = Anchor::new();
-	server.chain.link(app);
-	server.listen(Ipv4Addr(127, 0, 0, 1), 3000);
+    #[deriving(Clone)]
+    struct HelloWorld;
+
+    impl Controller for HelloWorld {
+        fn get(&self, request: &mut Request) -> Response {
+            Body("Hello, World")
+        }
+    }
+
+    let mut app: App = Anchor::new();
+    app.register("", HelloWorld);
+    app.run()
 }

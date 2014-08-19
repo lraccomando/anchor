@@ -1,17 +1,18 @@
 use http::{status, method};
-use iron::{Request, Response, Status, Unwind, Url};
+use iron::{Request, Status, Unwind, Url};
+use iron::Response as HttpResponse;
 
 
-pub enum Responses {
+pub enum Response {
     Body(&'static str),
     Status(&'static str, status::Status),
 }
 
+
 pub trait Controller: Send + Clone {
-    fn get(&self, request: &mut Request) -> Responses;
+    fn get(&self, request: &mut Request) -> Response;
 
-    fn dispatch(&self, request: &mut Request, response: &mut Response) -> Status {
-
+    fn dispatch(&self, request: &mut Request, response: &mut HttpResponse) -> Status {
         let output = match request.method {
             method::Get => { self.get(request) },
             _ => { Status("Please Try Again.", status::MethodNotAllowed)}
@@ -20,7 +21,7 @@ pub trait Controller: Send + Clone {
         match output {
             Body(body) => { response.serve(status::Ok, body); },
             Status(body, status) => { response.serve(status, body); }
-        }
+        };
 
         Unwind
     }
@@ -35,14 +36,16 @@ impl Clone for Box<Controller + Send> {
     fn clone(&self) -> Box<Controller + Send> { self.clone_box() }
 }
 
+
 #[cfg(test)]
 mod test {
-    use super::{Controller, Responses, Body};
+    use super::{Controller, Response, Body};
     use http::{method, status};
     use http::headers::{request, response};
     use anymap::AnyMap;
     use std::io::net::ip::{Ipv4Addr, SocketAddr};
-    use iron::{Request, Response, Url};
+    use iron::{Request, Url};
+    use iron::Response as HttpResponse;
     use url;
 
 
@@ -68,8 +71,8 @@ mod test {
         )
     }
 
-    fn mock_response() -> Response {
-        Response {
+    fn mock_response() -> HttpResponse {
+        HttpResponse {
             headers: box response::HeaderCollection::new(),
             status: None,
             body: None,
@@ -93,7 +96,7 @@ mod test {
     struct TestGetController;
 
     impl Controller for TestGetController {
-        fn get(&self, request: &mut Request) -> Responses {
+        fn get(&self, request: &mut Request) -> Response {
             Body("Get Was Successfully Hit")
         }
     }
