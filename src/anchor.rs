@@ -1,10 +1,12 @@
 use std::io::net::ip::Ipv4Addr;
 
-use iron::{Chain, Iron, Middleware, Request, Status, Server, Unwind};
+use iron::{Chain, Iron, Middleware,Status, Server, Unwind};
+use iron::Request as IronRequest;
 use iron::Response as HttpResponse;
 
 use controller::{Controller, Response, Body};
 use router::{Route, Router, DefaultRouter};
+use request::Request;
 
 
 pub type App = Anchor<DefaultRouter>;
@@ -47,11 +49,12 @@ impl<R: Router> AnchorMiddleware<R> {
 }
 
 impl<R: Router> Middleware for AnchorMiddleware<R> {
-    fn enter(&mut self, request: &mut Request, response: &mut HttpResponse) -> Status {
+    fn enter(&mut self, request: &mut IronRequest, response: &mut HttpResponse) -> Status {
         let path = request.url.path.connect("/");
         match self.router.match_path(&path) {
-            Some(controller) => {
-                controller.dispatch(request, response)
+            Some((controller, params)) => {
+                let mut anchor_request = Request::from_iron(request);
+                controller.dispatch(&anchor_request, response)
             }
             None => {
                 response.serve(::http::status::Ok, "No Route Found");

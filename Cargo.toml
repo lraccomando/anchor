@@ -6,7 +6,6 @@ authors = ["Lee Accomando <lraccomando@gmail.com>"]
 
 
 [[lib]]
-
 name = "anchor"
 path = "src/lib.rs"
 

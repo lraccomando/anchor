@@ -1,6 +1,8 @@
 use http::{status, method};
-use iron::{Request, Status, Unwind, Url};
+use iron::{Status, Unwind, Url};
 use iron::Response as HttpResponse;
+
+use request::Request;
 
 
 pub enum Response {

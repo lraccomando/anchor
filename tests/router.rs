@@ -47,3 +47,17 @@ fn test_routes_can_have_optional_trailing_slashes() {
     assert!(route.matches(&"test/".to_string()));
     assert!(route.matches(&"test".to_string()));
 }
+
+#[test]
+fn test_empty_routes_work_as_expected() {
+    let mut route = Route::new("".to_string(), box TestController);
+    assert!(route.matches(&"".to_string()));
+    assert!(route.matches(&"/".to_string()));
+}
+
+#[test]
+fn test_root_routes_work_as_expected() {
+    let mut route = Route::new("/".to_string(), box TestController);
+    assert!(route.matches(&"".to_string()));
+    assert!(route.matches(&"/".to_string()));
+}
