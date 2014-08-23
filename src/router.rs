@@ -33,10 +33,10 @@ impl Route {
         }
     }
 
-    pub fn params(&mut self, string: &String) -> HashMap<String, String> {
+    pub fn params<'a>(&'a mut self, string: &'a String) -> HashMap<String, String> {
         let mut params = HashMap::new();
         for capture in self.matcher.captures_iter(string.as_slice()) {
-            for group in self.named_groups.move_iter() {
+            for group in self.named_groups.mut_iter() {
                 params.insert(group.clone(), capture.name(group.as_slice()).to_string());
             }
         }
@@ -91,7 +91,7 @@ pub trait Router: Send + Clone {
 
     fn new() -> Self;
 
-    fn match_path(&mut self, path: &String) -> Option<(&Box<Controller + Send>, HashMap<String, String>)>;
+    fn match_path<'a>(&'a mut self, path: &'a String) -> Option<(Box<Controller + Send>, HashMap<String, String>)>;
 }
 
 
@@ -110,10 +110,10 @@ impl Router for DefaultRouter {
         self.routes.push(route);
     }
 
-    fn match_path(&mut self, path: &String) -> Option<(&Box<Controller + Send>, HashMap<String, String>)> {
-        for route in self.routes.iter() {
+    fn match_path<'a>(&'a mut self, path: &'a String) -> Option<(Box<Controller + Send>, HashMap<String, String>)> {
+        for route in self.routes.mut_iter() {
             if route.matches(path) {
-                return Some((&route.controller, route.params(path)))
+                return Some((clone(&route.controller), route.params(path)))
             }
         }
         None

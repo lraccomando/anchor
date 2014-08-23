@@ -1,15 +1,14 @@
 extern crate anchor;
 extern crate http;
 extern crate iron;
-extern crate anymap;
+extern crate typemap;
 extern crate url;
 
-use anchor::{Controller, Response, Body};
+use anchor::{Controller, Response, Request, Body};
 use http::{method, status};
 use http::headers::{request, response};
-use anymap::AnyMap;
+use typemap::TypeMap;
 use std::io::net::ip::{Ipv4Addr, SocketAddr};
-use iron::Request;
 use iron::Url as IronUrl;
 use iron::Response as HttpResponse;
 use url::Url;
@@ -32,7 +31,7 @@ fn mock_request(method: method::Method) -> Result<Request, String> {
                 headers: box request::HeaderCollection::new(),
                 body: "Testing".to_string(),
                 method: method,
-                extensions: AnyMap::new()
+                extensions: TypeMap::new()
                }
     )
 }
@@ -42,7 +41,7 @@ fn mock_response() -> HttpResponse {
         headers: box response::HeaderCollection::new(),
         status: None,
         body: None,
-        extensions: AnyMap::new(),
+        extensions: TypeMap::new(),
     }
 }
 
@@ -63,7 +62,7 @@ struct TestGetController;
 
 impl Controller for TestGetController {
     fn get(&self, request: &mut Request) -> Response {
-        Body("Get Was Successfully Hit")
+        Body("Get Was Successfully Hit".to_string())
     }
 }
 

@@ -1,6 +1,7 @@
+use std::collections::hashmap::HashMap;
 use std::io::net::ip::Ipv4Addr;
 
-use iron::{Chain, Iron, Middleware,Status, Server, Unwind};
+use iron::{Chain, Iron, Middleware, Status, Server, Unwind};
 use iron::Request as IronRequest;
 use iron::Response as HttpResponse;
 
@@ -54,7 +55,8 @@ impl<R: Router> Middleware for AnchorMiddleware<R> {
         match self.router.match_path(&path) {
             Some((controller, params)) => {
                 let mut anchor_request = Request::from_iron(request);
-                controller.dispatch(&anchor_request, response)
+                anchor_request.set_params(params);
+                controller.dispatch(&mut anchor_request, response)
             }
             None => {
                 response.serve(::http::status::Ok, "No Route Found");

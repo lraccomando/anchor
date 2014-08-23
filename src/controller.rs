@@ -6,8 +6,8 @@ use request::Request;
 
 
 pub enum Response {
-    Body(&'static str),
-    Status(&'static str, status::Status),
+    Body(String),
+    Status(String, status::Status),
 }
 
 
@@ -17,7 +17,7 @@ pub trait Controller: Send + Clone {
     fn dispatch(&self, request: &mut Request, response: &mut HttpResponse) -> Status {
         let output = match request.method {
             method::Get => { self.get(request) },
-            _ => { Status("Please Try Again.", status::MethodNotAllowed)}
+            _ => { Status("Please Try Again.".to_string(), status::MethodNotAllowed)}
         };
 
         match output {

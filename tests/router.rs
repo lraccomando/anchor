@@ -2,7 +2,7 @@ extern crate anchor;
 extern crate iron;
 
 use anchor::{Body, Controller, Response, Route, Router};
-use iron::Request;
+use anchor::Request;
 
 // Tests for the Route Struct
 
@@ -10,7 +10,7 @@ use iron::Request;
 struct TestController;
 impl Controller for TestController {
     fn get(&self, request: &mut Request) -> Response {
-        Body("This worked!")
+        Body("This worked!".to_string())
     }
 }
 
