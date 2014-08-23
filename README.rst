@@ -6,7 +6,8 @@ Goal of this project is to create a simple, fast, and intuitive web framework in
 
 Very much WIP but this is where we are at thus far.
 
-Obligatory Hello World -:
+Obligatory Hello World -
+
 .. code-block:: rust
 
     struct HelloWorld;
@@ -20,7 +21,8 @@ Obligatory Hello World -:
     app.register("/", HelloWorld);
     app.run();
 
-Pass parameters to controllers -:
+Pass parameters to controllers -
+
 .. code-block:: rust
 
     struct HelloName;
